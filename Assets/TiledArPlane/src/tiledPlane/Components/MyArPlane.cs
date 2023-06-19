@@ -9,6 +9,6 @@ namespace TiledPlane.Components
     public struct MyArPlane : IComponentData
     {
         public FixedString128Bytes Name;
-        public NativeArray<float2> Boundary;
+        public NativeArray<float3> Boundary;
     }
 }

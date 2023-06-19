@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.ltmx.mathematics.mathx": "https://github.com/LTMX/Unity.mathx.git",
     "com.unity.ai.navigation": "1.1.4",
     "com.unity.burst": "1.8.7",
     "com.unity.charactercontroller": "1.0.0-exp.22",

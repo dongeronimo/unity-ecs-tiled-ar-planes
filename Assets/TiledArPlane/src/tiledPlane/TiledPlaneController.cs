@@ -33,10 +33,11 @@ namespace TiledPlane
             //Creates the entity of this plane in the ECS context
             World w = World.DefaultGameObjectInjectionWorld;
             MyEntity = w.EntityManager.CreateEntity();
+            w.EntityManager.SetName(MyEntity, gameObject.name);
             w.EntityManager.AddComponent<LocalTransform>(MyEntity);
             var myPlane = new MyArPlane
             {
-                Boundary = new NativeArray<float2>(),
+                Boundary = new NativeArray<float3>(),
                 Name = gameObject.name
             };
             w.EntityManager.AddComponentData(MyEntity, myPlane);
@@ -59,7 +60,7 @@ namespace TiledPlane
         
         private void UpdateLocalTransformComponent(World w, ARPlane plane)
         {
-            var localTransform = w.EntityManager.GetComponentData<LocalTransform>(MyEntity);
+            LocalTransform localTransform = w.EntityManager.GetComponentData<LocalTransform>(MyEntity);
             localTransform.Position = transform.position;
             localTransform.Rotation = transform.rotation;
             localTransform.Scale = transform.localScale.x;//WARNING! I ASSUME THAT THE SCALE IS THE SAME ON THE THREE AXES.
@@ -67,18 +68,24 @@ namespace TiledPlane
         }
         private void UpdateARPlaneComponent(World w, ARPlane plane)
         {
-            var arPlaneComponent = w.EntityManager.GetComponentData<MyArPlane>(MyEntity);
+            MyArPlane arPlaneComponent = w.EntityManager.GetComponentData<MyArPlane>(MyEntity);
+            arPlaneComponent.Boundary.Dispose();
             //moves the data from the vector2 to a nativeArray of float2 and passes to the
             //component
-            var arr = new float2[plane.boundary.Length];
-            for(var i = 0; i < plane.boundary.Length; i++)
+            float3[] arr = new float3[plane.boundary.Length];
+            for (int i = 0; i < plane.boundary.Length; i++)
             {
-                arr[i].x = plane.boundary[i].x;
-                arr[i].y = plane.boundary[i].y;
+                var position = new Vector3(
+                    plane.boundary[i].x, 
+                    0, 
+                    plane.boundary[i].y);
+                var rotated = transform.rotation * position;
+                arr[i].x = rotated.x;
+                arr[i].y = rotated.y;
+                arr[i].z = rotated.z;
             }
-            var nativeArr = new NativeArray<float2>(arr, Allocator.Persistent);
+            NativeArray<float3> nativeArr = new NativeArray<float3>(arr, Allocator.Persistent);
             arPlaneComponent.Boundary = nativeArr;
-            
             w.EntityManager.SetComponentData(MyEntity, arPlaneComponent);
         }
         // Update is called once per frame
